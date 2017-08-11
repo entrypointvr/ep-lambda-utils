@@ -1,30 +1,55 @@
-export default function invoke(parameters) {
-  const FIELDS = ['functionName', 'body', 'currentFunction']
-  if(!parameters) {
-    return Promise.reject('Improperly formatted request, empty request sent')
+function invokeLambda(parameters) {
+  return ({
+    FunctionName: parameters.functionName,
+    Payload: JSON.stringify({
+      body: JSON.stringify(parameters.body),
+      requestContext: {
+        identity: {
+          userAgent: parameters.currentFunction,
+          sourceIp: parameters.currentFunction
+        }
+      }
+    })
+  })
+}
+
+//note: if using this function with axios, pass in parameters.data
+function checkPostParameters(parameters) {
+  let fields = parameters.fields
+  let body, missingParameters
+  try {
+    body = JSON.parse(parameters.body)
   }
-  let missingParameters = FIELDS.filter((value) => !parameters.hasOwnProperty(value))
+  catch {
+    return Promise.reject(`Improperly formatted requested, failed to parse body`)
+  }
+  missingParameters = fields.filter((value) => !body.hasOwnProperty(value))
   if (missingParameters.length > 0) {
     return Promise.reject(`Missing the following parameters: ${missingParameters.join(', ')}`)
-  } else {
-    let stringifyBody
-    try {
-      stringifyBody = JSON.stringify(parameters.body)
-    } catch(e) {
-      return Promise.reject(`Improperly formatted request, invalid body sent`)
-    }
-    let response = {
-      FunctionName: parameters.functionName,
-      Payload: JSON.stringify({
-        body: stringifyBody,
-        requestContext: {
-          identity: {
-            userAgent: parameters.currentFunction,
-            sourceIp: parameters.currentFunction
-          }
+  }
+  return Promise.resolve()
+}
+
+function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevResults) {
+  let cursor = prevResults ? prevResults[cursorFieldName]: undefined
+  try {
+    return awsFunction({[cursorFieldName]: cursor}).promise()
+    .then((response) => {
+      if (response && response[listFieldName]) {
+        if(response[cursorFieldName]) {
+          return paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, response)
+        } else {
+          let lambdas = prevResults ? response[listFieldName].concat(prevResults[listFieldName]) : response[listFieldName]
+          return Promise.resolve(lambdas)
         }
-      })
-    }
-    return Promise.resolve(response)
+      } else {
+        return Promise.reject(`No results found for ${listFieldName}`)
+      }
+    })
+  } catch (error) {
+    return Promise.reject(`Error in paginateAwsFunction, likely caused by not binding the awsFunction to the containing object. Full error: ${error.stack}`)
   }
 }
+
+module.exports = {invokeLambda, checkPostParameters, paginateAwsFunction}
+
