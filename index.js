@@ -1,4 +1,4 @@
-function invokeLambda(parameters) {
+function prepareLambdaInvokeBody(parameters) {
   return ({
     FunctionName: parameters.functionName,
     Payload: JSON.stringify({
@@ -51,5 +51,5 @@ function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevRe
   }
 }
 
-module.exports = {invokeLambda, checkPostParameters, paginateAwsFunction}
+module.exports = {prepareLambdaInvokeBody, checkPostParameters, paginateAwsFunction}
 
