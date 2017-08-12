@@ -19,9 +19,8 @@ function checkPostParameters(parameters) {
   let body, missingParameters
   try {
     body = JSON.parse(parameters.body)
-  }
-  catch {
-    return Promise.reject(`Improperly formatted requested, failed to parse body`)
+  } catch (e) {
+    return Promise.reject(`Improperly formatted requested, failed to parse body ${e}`)
   }
   missingParameters = fields.filter((value) => !body.hasOwnProperty(value))
   if (missingParameters.length > 0) {
@@ -51,5 +50,9 @@ function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevRe
   }
 }
 
-module.exports = {prepareLambdaInvokeBody, checkPostParameters, paginateAwsFunction}
+module.exports = {
+  prepareLambdaInvokeBody,
+  checkPostParameters,
+  paginateAwsFunction
+}
 
