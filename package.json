@@ -17,5 +17,10 @@
   "bugs": {
     "url": "https://github.com/entrypointvr/ep-lambda-utils/issues"
   },
-  "homepage": "https://github.com/entrypointvr/ep-lambda-utils#readme"
+  "homepage": "https://github.com/entrypointvr/ep-lambda-utils#readme",
+  "dependencies": {
+    "lodash.has": "^4.5.2",
+    "ep-api-response-objects": "git+ssh://git@github.com/entrypointvr/ep-api-response-objects.git#v0.0.4",
+    "ep-basic-logger": "git+ssh://git@github.com/entrypointvr/ep-basic-logger.git#v0.0.3"
+  }
 }
