@@ -7,6 +7,7 @@ function prepareLambdaInvokeBody(parameters) {
     FunctionName: parameters.functionName,
     Payload: JSON.stringify({
       body: JSON.stringify(parameters.body),
+      httpMethod: 'POST',
       requestContext: {
         identity: {
           userAgent: parameters.currentFunction,
@@ -15,22 +16,6 @@ function prepareLambdaInvokeBody(parameters) {
       }
     })
   })
-}
-
-//note: if using this function with axios, pass in parameters.data
-function checkPostParameters(parameters) {
-  let fields = parameters.fields
-  let body, missingParameters
-  try {
-    body = JSON.parse(parameters.body)
-  } catch (e) {
-    return Promise.reject(`Improperly formatted requested, failed to parse body ${e}`)
-  }
-  missingParameters = fields.filter((value) => !body.hasOwnProperty(value))
-  if (missingParameters.length > 0) {
-    return Promise.reject(`Missing the following parameters: ${missingParameters.join(', ')}`)
-  }
-  return Promise.resolve()
 }
 
 function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevResults) {
@@ -59,8 +44,11 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
     const requestContext = event.requestContext || {}
     const identity = requestContext.identity || {}
     const headers = event.headers || {}
-    const awsRequestId = context.awsRequestId, sourceIp = identity.sourceIp, token = headers['Authorization'], userAgent = identity.userAgent
-    const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, token ? { token }: null, awsRequestId ? { awsRequestId } : null)
+    const awsRequestId = context.awsRequestId, token = headers['Authorization'], sourceIp = identity.sourceIp, userAgent = identity.userAgent
+    if (token) {
+      logger.info(`Token for current request - ${token}`, {awsRequestId, sourceIp})
+    }
+    const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters, missingParameters
     if(event.httpMethod === 'POST') {
       try {
