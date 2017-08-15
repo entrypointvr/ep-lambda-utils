@@ -60,8 +60,9 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
     const requestContext = event.requestContext || {}
     const identity = requestContext.identity || {}
     const headers = event.headers || {}
-    const awsRequestId = context.awsRequestId, sourceIp = identity.sourceIp, token = headers['Authorization'], userAgent = identity.userAgent
-    const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, token ? { token }: null, awsRequestId ? { awsRequestId } : null)
+    const awsRequestId = context.awsRequestId, sourceIp = identity.sourceIp, userAgent = identity.userAgent
+    logger.info(`Token for current request - ${headers['Authorization']}`, {awsRequestId, sourceIp})
+    const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters, missingParameters
     if(event.httpMethod === 'POST') {
       try {
