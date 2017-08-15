@@ -45,9 +45,6 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
     const identity = requestContext.identity || {}
     const headers = event.headers || {}
     const awsRequestId = context.awsRequestId, token = headers['Authorization'], sourceIp = identity.sourceIp, userAgent = identity.userAgent
-    if (token) {
-      logger.info(`Token for current request - ${token}`, {awsRequestId, sourceIp})
-    }
     const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters, missingParameters
     if(event.httpMethod === 'POST') {
@@ -68,7 +65,12 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
       logger.error(`Missing parameters: ${missingParameters.join(', ')}`, loggerObject)
       return callback(null, apiResponse.lambda.BadRequest('Missing required parameters'))
     }
-    logger.logRequestStart(userAgent, event.body, loggerObject)
+    logger.logRequestStart(userAgent, parameters, loggerObject)
+    if (token) {
+      logger.info(`Token for current request - ${token}`, {awsRequestId, sourceIp})
+      // If the token is available add it as a parameter so it can be accessed
+      parameters.token = token
+    }
     lambdaCallback(parameters, loggerObject, callback)
   }
 }
