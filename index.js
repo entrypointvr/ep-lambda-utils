@@ -7,6 +7,7 @@ function prepareLambdaInvokeBody(parameters) {
     FunctionName: parameters.functionName,
     Payload: JSON.stringify({
       body: JSON.stringify(parameters.body),
+      httpMethod: 'POST',
       requestContext: {
         identity: {
           userAgent: parameters.currentFunction,
