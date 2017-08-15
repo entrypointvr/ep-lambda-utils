@@ -75,7 +75,6 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
 
 module.exports = {
   prepareLambdaInvokeBody,
-  checkPostParameters,
   paginateAwsFunction,
   applyLambdaMiddleware
 }
