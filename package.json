@@ -1,6 +1,6 @@
 {
   "name": "ep-lambda-utils",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Documentation:",
   "main": "index.js",
   "private": true,
@@ -22,5 +22,8 @@
     "lodash.has": "^4.5.2",
     "ep-api-response-objects": "git+ssh://git@github.com/entrypointvr/ep-api-response-objects.git#v0.0.4",
     "ep-basic-logger": "git+ssh://git@github.com/entrypointvr/ep-basic-logger.git#v0.0.3"
+  },
+  "devDependencies": {
+    "jest": "^20.0.4"
   }
 }

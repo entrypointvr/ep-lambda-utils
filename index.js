@@ -40,6 +40,11 @@ function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevRe
 }
 
 function applyLambdaMiddleware(requiredFields, lambdaCallback) {
+  // If there are is no lambdaCallback then switch arity
+  if(!lambdaCallback) {
+    lambdaCallback = requiredFields
+    requiredFields = null
+  }
   return (event, context, callback) => {
     const requestContext = event.requestContext || {}
     const identity = requestContext.identity || {}
@@ -47,23 +52,25 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
     const awsRequestId = context.awsRequestId, token = headers['Authorization'], sourceIp = identity.sourceIp, userAgent = identity.userAgent
     const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters, missingParameters
-    if(event.httpMethod === 'POST') {
-      try {
-        parameters = JSON.parse(event.body)
-      } catch (e) {
-        logger.error(`Invalid json body submitted, error while parsing: ${e}`, loggerObject)
+    if(requiredFields && requiredFields.length > 0) {
+      if(event.httpMethod === 'POST') {
+        try {
+          parameters = JSON.parse(event.body)
+        } catch (e) {
+          logger.error(`Invalid json body submitted, error while parsing: ${e}`, loggerObject)
+        }
+      } else {
+        parameters = event.queryStringParameters
       }
-    } else {
-      parameters = event.queryStringParameters
-    }
-    if (!parameters || parameters === '' || Object.keys(parameters).length === 0) {
-      logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
-      return callback(null, apiResponse.lambda.BadRequest('Bad request empty parameters submitted'))
-    }
-    missingParameters = requiredFields.filter((field) => !has(parameters, field))
-    if (missingParameters.length > 0) {
-      logger.error(`Missing parameters: ${missingParameters.join(', ')}`, loggerObject)
-      return callback(null, apiResponse.lambda.BadRequest('Missing required parameters'))
+      if (!parameters || parameters === '' || Object.keys(parameters).length === 0) {
+        logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
+        return callback(null, apiResponse.lambda.BadRequest('Bad request empty parameters submitted'))
+      }
+      missingParameters = requiredFields.filter((field) => !has(parameters, field))
+      if (missingParameters.length > 0) {
+        logger.error(`Missing parameters: ${missingParameters.join(', ')}`, loggerObject)
+        return callback(null, apiResponse.lambda.BadRequest('Missing required parameters'))
+      }
     }
     logger.logRequestStart(userAgent, parameters, loggerObject)
     if (token) {
