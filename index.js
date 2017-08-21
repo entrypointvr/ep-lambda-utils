@@ -49,7 +49,14 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
     const requestContext = event.requestContext || {}
     const identity = requestContext.identity || {}
     const headers = event.headers || {}
-    const awsRequestId = context.awsRequestId, token = headers['Authorization'], sourceIp = identity.sourceIp, userAgent = identity.userAgent
+    const awsRequestId = context.awsRequestId
+    const token = headers['Authorization']
+    const sourceIp = identity.sourceIp
+    const userAgent = identity.userAgent
+
+    const pathParams = event.pathParameters || {}
+    const proxyPathParams = pathParams.proxy
+
     const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters, missingParameters
     if(requiredFields && requiredFields.length > 0) {
@@ -77,6 +84,10 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
       logger.info(`Token for current request - ${token}`, {awsRequestId, sourceIp})
       // If the token is available add it as a parameter so it can be accessed
       parameters.token = token
+    }
+    if(proxyPathParams) {
+      logger.info(`Path params for current request - ${proxyPathParams}`, {awsRequestId, sourceIp})
+      parameters.pathParameters = proxyPathParams
     }
     lambdaCallback(parameters, loggerObject, callback)
   }
