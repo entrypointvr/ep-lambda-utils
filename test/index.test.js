@@ -2,7 +2,7 @@ const { applyLambdaMiddleware } = require('../index')
 
 test('apply lambda middleware no required fields', (done) => {
   applyLambdaMiddleware((parameters, loggerObject, callback) => {
-    expect(parameters).not.toBeDefined()
+    expect(parameters).toBeDefined()
     done()
   })({}, {}, {})
 })
@@ -21,4 +21,12 @@ test('apply lambda middleware required fields success', (done) => {
     expect(parameters.pathParameters).toBe('test')
     done()
   })({httpMethod: 'GET', pathParameters: { proxy: 'test' }, queryStringParameters: { 'test': 'testing'}}, {}, {})
+})
+
+test('apply lambda middleware, path parameters no required fields success', (done) => {
+  applyLambdaMiddleware((parameters, loggerObject, callback) => {
+    expect(parameters).toBeDefined()
+    expect(parameters.pathParameters).toBe('test')
+    done()
+  })({httpMethod: 'GET', pathParameters: { proxy: 'test' }}, {}, {})
 })

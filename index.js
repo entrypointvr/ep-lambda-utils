@@ -58,7 +58,7 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
     const proxyPathParams = pathParams.proxy
 
     const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
-    let parameters, missingParameters
+    let parameters = {}, missingParameters
     if(requiredFields && requiredFields.length > 0) {
       if(event.httpMethod === 'POST') {
         try {
