@@ -1,6 +1,6 @@
 {
   "name": "ep-lambda-utils",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Documentation:",
   "main": "index.js",
   "private": true,
@@ -20,7 +20,7 @@
   "homepage": "https://github.com/entrypointvr/ep-lambda-utils#readme",
   "dependencies": {
     "ep-api-response-objects": "git+ssh://git@github.com/entrypointvr/ep-api-response-objects.git#v0.0.4",
-    "ep-basic-logger": "git+ssh://git@github.com/entrypointvr/ep-basic-logger.git#v0.0.3",
+    "ep-basic-logger": "git+ssh://git@github.com/entrypointvr/ep-basic-logger.git#v0.0.4",
     "lodash.has": "^4.5.2",
     "request": "^2.81.0"
   },
