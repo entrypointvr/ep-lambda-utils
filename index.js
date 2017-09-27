@@ -60,7 +60,7 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
 
     const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters = {}, missingParameters
-    if(requiredFields && requiredFields.length > 0) {
+    if(requiredFields && requiredFields.length >= 0) {
       if(event.httpMethod === 'POST') {
         try {
           parameters = JSON.parse(event.body)
