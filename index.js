@@ -90,6 +90,8 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
       logger.info(`Path params for current request - ${proxyPathParams}`, {awsRequestId, sourceIp})
       parameters.pathParameters = proxyPathParams
     }
+    
+    parameters.httpMethod = event.httpMethod
     lambdaCallback(parameters, loggerObject, callback)
   }
 }
