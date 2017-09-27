@@ -70,7 +70,7 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
       } else {
         parameters = event.queryStringParameters
       }
-      if (!parameters || parameters === '' || Object.keys(parameters).length === 0) {
+      if ((requiredFields && requiredFields.length > 0) && (!parameters || parameters === '' || Object.keys(parameters).length === 0)) {
         logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
         return callback(null, apiResponse.lambda.BadRequest('Bad request empty parameters submitted'))
       }
