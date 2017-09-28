@@ -40,12 +40,14 @@ function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevRe
   }
 }
 
-function applyLambdaMiddleware(requiredFields, lambdaCallback) {
-  // If there are is no lambdaCallback then switch arity
+function applyLambdaMiddleware(options, lambdaCallback) {
+  let requiredFields = options.requiredFields
+  // If there are is no options then switch arity
   if(!lambdaCallback) {
-    lambdaCallback = requiredFields
-    requiredFields = null
+    lambdaCallback = options
+    options = null
   }
+ 
   return (event, context, callback) => {
     const requestContext = event.requestContext || {}
     const identity = requestContext.identity || {}
@@ -57,6 +59,10 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
 
     const pathParams = event.pathParameters || {}
     const proxyPathParams = pathParams.proxy
+    
+    if (options.dontWaitForEmptyLoop) {
+      context.callbackWaitsForEmptyEventLoop = false
+    }
 
     const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters = {}, missingParameters
