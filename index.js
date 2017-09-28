@@ -60,20 +60,21 @@ function applyLambdaMiddleware(requiredFields, lambdaCallback) {
 
     const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
     let parameters = {}, missingParameters
+    
+    if(event.httpMethod === 'POST') {
+      try {
+        parameters = JSON.parse(event.body)
+      } catch (e) {
+        logger.error(`Invalid json body submitted, error while parsing: ${e}`, loggerObject)
+      }
+    } else {
+      parameters = event.queryStringParameters
+    }
+    if ((requiredFields && requiredFields.length > 0) && (!parameters || parameters === '' || Object.keys(parameters).length === 0)) {
+      logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
+      return callback(null, apiResponse.lambda.BadRequest('Bad request empty parameters submitted'))
+    }
     if(requiredFields && requiredFields.length >= 0) {
-      if(event.httpMethod === 'POST') {
-        try {
-          parameters = JSON.parse(event.body)
-        } catch (e) {
-          logger.error(`Invalid json body submitted, error while parsing: ${e}`, loggerObject)
-        }
-      } else {
-        parameters = event.queryStringParameters
-      }
-      if ((requiredFields && requiredFields.length > 0) && (!parameters || parameters === '' || Object.keys(parameters).length === 0)) {
-        logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
-        return callback(null, apiResponse.lambda.BadRequest('Bad request empty parameters submitted'))
-      }
       missingParameters = requiredFields.filter((field) => !has(parameters, field))
       if (missingParameters.length > 0) {
         logger.error(`Missing parameters: ${missingParameters.join(', ')}`, loggerObject)
