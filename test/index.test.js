@@ -31,13 +31,27 @@ test('apply lambda middleware, path parameters no required fields success', (don
   })({httpMethod: 'GET', pathParameters: { proxy: 'test' }}, {}, {})
 })
 
-test('basic router', () => {
+test('basic router', (done) => {
   let router = new Router()
-  router.get('/test/route', () => {})
-  router.post('/test/route', () => {})
-  expect(router.matchAndRun('GET', '/test/route', () => {})).toBe(true)
-  expect(router.matchAndRun('GET', '/test/route/test', () => {})).toBe(false)
-  expect(router.matchAndRun('GET', '/test/routes', () => {})).toBe(false)
-  expect(router.matchAndRun('GET', '/test/route/', () => {})).toBe(false)
-  expect(router.matchAndRun('GET', '/test/route/', () => {})).toBe(false)
+  router.get('/test/route', () => Promise.resolve(true))
+  router.post('/test/route', () => Promise.resolve(true))
+  let routes = [
+    router.matchAndRun('GET', '/test/route'),
+    router.matchAndRun('GET', 'test/route'),
+    router.matchAndRun('GET', '/test/route/test'),
+    router.matchAndRun('GET', '/test/routes'),
+    router.matchAndRun('GET', '/test/route/s'),
+    router.matchAndRun('GET', '/test/route/')
+  ]
+  let test = routes.map(p => p.catch(() => false))
+  Promise.all(routes.map(p => p.catch(() => false)))
+    .then(([one, two, three, four, five, six]) => {
+      expect(one).toBe(true)
+      expect(two).toBe(false)
+      expect(three).toBe(false)
+      expect(four).toBe(false)
+      expect(five).toBe(false)
+      expect(six).toBe(false)
+      done()
+  })
 })
