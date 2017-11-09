@@ -1,6 +1,7 @@
 const has = require('lodash.has');
 const apiResponse = require('ep-api-response-objects')
 const logger = require('ep-basic-logger')
+const Router = require('./lib/router')
 const { postToScaphold, getScapholdToken } = require('./lib/scapholdUtils')
 
 function prepareLambdaInvokeBody(parameters) {
@@ -43,11 +44,11 @@ function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevRe
 function applyLambdaMiddleware(options, lambdaCallback) {
   let requiredFields = options.requiredFields
   // If there are is no options then switch arity
-  if(!lambdaCallback) {
+  if (!lambdaCallback) {
     lambdaCallback = options
     options = null
   }
- 
+
   return (event, context, callback) => {
     const requestContext = event.requestContext || {}
     const identity = requestContext.identity || {}
@@ -59,15 +60,15 @@ function applyLambdaMiddleware(options, lambdaCallback) {
 
     const pathParams = event.pathParameters || {}
     const proxyPathParams = pathParams.proxy
-    
-    if (options.dontWaitForEmptyLoop) {
+
+    if (options && options.dontWaitForEmptyLoop) {
       context.callbackWaitsForEmptyEventLoop = false
     }
 
-    const loggerObject = Object.assign({}, sourceIp ? { sourceIp } : null, awsRequestId ? { awsRequestId } : null)
+    const loggerObject = Object.assign({}, sourceIp ? {sourceIp} : null, awsRequestId ? {awsRequestId} : null)
     let parameters = {}, missingParameters
-    
-    if(event.httpMethod === 'POST') {
+
+    if (event.httpMethod === 'POST') {
       try {
         parameters = JSON.parse(event.body)
       } catch (e) {
@@ -80,7 +81,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
       return callback(null, apiResponse.lambda.BadRequest('Bad request empty parameters submitted'))
     }
-    if(requiredFields && requiredFields.length >= 0) {
+    if (requiredFields && requiredFields.length >= 0) {
       missingParameters = requiredFields.filter((field) => !has(parameters, field))
       if (missingParameters.length > 0) {
         logger.error(`Missing parameters: ${missingParameters.join(', ')}`, loggerObject)
@@ -93,13 +94,13 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       // If the token is available add it as a parameter so it can be accessed
       parameters.token = token
     }
-    if(proxyPathParams) {
+    if (proxyPathParams) {
       logger.info(`Path params for current request - ${proxyPathParams}`, {awsRequestId, sourceIp})
       if (!parameters) parameters = {}
       parameters.pathParameters = proxyPathParams
     }
-    
-    if(parameters) parameters.httpMethod = event.httpMethod
+
+    if (parameters) parameters.httpMethod = event.httpMethod
     lambdaCallback(parameters, loggerObject, callback)
   }
 }
@@ -109,6 +110,7 @@ module.exports = {
   paginateAwsFunction,
   applyLambdaMiddleware,
   postToScaphold,
-  getScapholdToken
+  getScapholdToken,
+  Router
 }
 
