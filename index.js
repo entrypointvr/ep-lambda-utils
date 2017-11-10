@@ -73,7 +73,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
         parameters.body = JSON.parse(event.body)
         logger.logRequestStart(userAgent, parameters.body, loggerObject)
       } catch (e) {
-        logger.error(`Invalid json body submitted, error while parsing: ${e}`, loggerObject)
+        logger.warn(`Invalid or empty json body submitted, error while parsing: ${e}`, loggerObject)
       }
     } else {
       parameters.query = event.queryStringParameters

@@ -43,7 +43,6 @@ test('basic router', (done) => {
     router.matchAndRun('GET', '/test/route/s'),
     router.matchAndRun('GET', '/test/route/')
   ]
-  let test = routes.map(p => p.catch(() => false))
   Promise.all(routes.map(p => p.catch(() => false)))
     .then(([one, two, three, four, five, six]) => {
       expect(one).toBe(true)
@@ -54,4 +53,25 @@ test('basic router', (done) => {
       expect(six).toBe(false)
       done()
   })
+})
+
+
+test('router composed of other routers', (done) => {
+  let router = new Router()
+  let router1 = new Router()
+  let router2 = new Router()
+  router1.get('/test/route1', () => Promise.resolve(true))
+  router2.post('/test/route2', () => Promise.resolve(true))
+  router.addRoutesFromRouter(router1)
+  router.addRoutesFromRouter(router2)
+  let routes = [
+    router.matchAndRun('GET', '/test/route1'),
+    router.matchAndRun('POST', '/test/route2'),
+  ]
+  Promise.all(routes.map(p => p.catch(() => false)))
+    .then(([one, two]) => {
+      expect(one).toBe(true)
+      expect(two).toBe(true)
+      done()
+    })
 })
