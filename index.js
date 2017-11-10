@@ -66,16 +66,18 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     }
 
     const loggerObject = Object.assign({}, sourceIp ? {sourceIp} : null, awsRequestId ? {awsRequestId} : null)
-    let parameters = {}, missingParameters
+    let parameters = { body: {}, query: {}}, missingParameters
 
-    if (event.httpMethod === 'POST') {
+    if (event.httpMethod === 'POST' || event.httpMethod === 'DELETE') {
       try {
-        parameters = JSON.parse(event.body)
+        parameters.body = JSON.parse(event.body)
+        logger.logRequestStart(userAgent, parameters.body, loggerObject)
       } catch (e) {
         logger.error(`Invalid json body submitted, error while parsing: ${e}`, loggerObject)
       }
     } else {
-      parameters = event.queryStringParameters
+      parameters.query = event.queryStringParameters
+      logger.logRequestStart(userAgent, parameters.query, loggerObject)
     }
     if ((requiredFields && requiredFields.length > 0) && (!parameters || parameters === '' || Object.keys(parameters).length === 0)) {
       logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
@@ -88,7 +90,6 @@ function applyLambdaMiddleware(options, lambdaCallback) {
         return callback(null, apiResponse.lambda.BadRequest('Missing required parameters'))
       }
     }
-    logger.logRequestStart(userAgent, parameters, loggerObject)
     if (token) {
       logger.info(`Token for current request - ${token}`, {awsRequestId, sourceIp})
       // If the token is available add it as a parameter so it can be accessed

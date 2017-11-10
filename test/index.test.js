@@ -17,7 +17,7 @@ test('apply lambda middleware required fields error', (done) => {
 test('apply lambda middleware required fields success', (done) => {
   applyLambdaMiddleware(['test'], (parameters, loggerObject, callback) => {
     expect(parameters).toBeDefined()
-    expect(parameters.test).toBe('testing')
+    expect(parameters.query.test).toBe('testing')
     expect(parameters.pathParameters).toBe('test')
     done()
   })({httpMethod: 'GET', pathParameters: { proxy: 'test' }, queryStringParameters: { 'test': 'testing'}}, {}, {})
