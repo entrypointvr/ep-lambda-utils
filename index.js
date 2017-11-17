@@ -2,6 +2,7 @@ const has = require('lodash.has');
 const apiResponse = require('ep-api-response-objects')
 const logger = require('ep-basic-logger')
 const Router = require('./lib/router')
+const Buffer = require('buffer')
 const { postToScaphold, getScapholdToken } = require('./lib/scapholdUtils')
 
 function prepareLambdaInvokeBody(parameters) {
@@ -41,6 +42,8 @@ function paginateAwsFunction(awsFunction, cursorFieldName, listFieldName, prevRe
   }
 }
 
+
+// https://develandoo.com/blog/nodejs/parsing-multipart-body-aws-lambda-function-serverless
 function applyLambdaMiddleware(options, lambdaCallback) {
   let requiredFields = options.requiredFields
   // If there are is no options then switch arity
@@ -69,16 +72,23 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     let parameters = { body: {}, query: {}}, missingParameters
 
     if (event.httpMethod === 'POST' || event.httpMethod === 'DELETE') {
-      try {
-        parameters.body = JSON.parse(event.body)
-        logger.logRequestStart(userAgent, parameters.body, loggerObject)
-      } catch (e) {
-        logger.warn(`Invalid or empty json body submitted, error while parsing: ${e}`, loggerObject)
+      if (event.isBase64Encoded) {
+        // A request will be base 64 encoded if the content-type matches one of the binary types specified in the api gateway
+        //if this is true then don't try to JSON parse it, just return a buffer
+        parameters.body = new Buffer(event.body, 'base64')
+      } else {
+        try {
+          parameters.body = JSON.parse(event.body)
+          logger.logRequestStart(userAgent, parameters.body, loggerObject)
+        } catch (e) {
+          logger.warn(`Invalid or empty json body submitted, error while parsing: ${e}`, loggerObject)
+        }
       }
     } else {
       parameters.query = event.queryStringParameters
       logger.logRequestStart(userAgent, parameters.query, loggerObject)
     }
+    logger.info(`Processing with http method: ${event.httpMethod}`, loggerObject)
     if ((requiredFields && requiredFields.length > 0) && (!parameters || parameters === '' || Object.keys(parameters).length === 0)) {
       logger.error(`Bad request - empty parameters: ${parameters}`, loggerObject)
       return callback(null, apiResponse.lambda.BadRequest('Bad request empty parameters submitted'))
@@ -91,12 +101,12 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       }
     }
     if (token) {
-      logger.info(`Token for current request - ${token}`, {awsRequestId, sourceIp})
+      logger.info(`Token for current request: ${token}`, {awsRequestId, sourceIp})
       // If the token is available add it as a parameter so it can be accessed
       parameters.token = token
     }
     if (proxyPathParams) {
-      logger.info(`Path params for current request - ${proxyPathParams}`, {awsRequestId, sourceIp})
+      logger.info(`Path params for current request: ${proxyPathParams}`, {awsRequestId, sourceIp})
       if (!parameters) parameters = {}
       parameters.pathParameters = proxyPathParams
     }
