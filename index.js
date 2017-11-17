@@ -58,6 +58,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     const headers = event.headers || {}
     const awsRequestId = context.awsRequestId
     const token = headers['Authorization']
+    const contentType = headers['Content-Type']
     const sourceIp = identity.sourceIp
     const userAgent = identity.userAgent
 
@@ -111,7 +112,10 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       parameters.pathParameters = proxyPathParams
     }
 
-    if (parameters) parameters.httpMethod = event.httpMethod
+    if (parameters) {
+      parameters.httpMethod = event.httpMethod
+      parameters.contentType = contentType
+    }
     lambdaCallback(parameters, loggerObject, callback)
   }
 }
