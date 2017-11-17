@@ -2,7 +2,6 @@ const has = require('lodash.has');
 const apiResponse = require('ep-api-response-objects')
 const logger = require('ep-basic-logger')
 const Router = require('./lib/router')
-const Buffer = require('buffer')
 const { postToScaphold, getScapholdToken } = require('./lib/scapholdUtils')
 
 function prepareLambdaInvokeBody(parameters) {
