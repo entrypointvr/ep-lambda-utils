@@ -75,6 +75,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       if (event.isBase64Encoded) {
         // A request will be base 64 encoded if the content-type matches one of the binary types specified in the api gateway
         //if this is true then don't try to JSON parse it, just return a buffer
+        logger.info(`Found base encoded body of size ${event.body.length}, including in parameters`, loggerObject)
         parameters.body = new Buffer(event.body, 'base64')
       } else {
         try {

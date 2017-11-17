@@ -31,6 +31,14 @@ test('apply lambda middleware, path parameters no required fields success', (don
   })({httpMethod: 'GET', pathParameters: { proxy: 'test' }}, {}, {})
 })
 
+test('apply lambda middleware, binary data', (done) => {
+  applyLambdaMiddleware((parameters, loggerObject, callback) => {
+    expect(parameters).toBeDefined()
+    expect(parameters.pathParameters).toBe('test')
+    done()
+  })({isBase64Encoded: true, httpMethod: 'POST', body: 'test', pathParameters: { proxy: 'test' }}, {}, {})
+})
+
 test('basic router', (done) => {
   let router = new Router()
   router.get('/test/route', () => Promise.resolve(true))
