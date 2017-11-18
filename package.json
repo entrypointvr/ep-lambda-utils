@@ -1,6 +1,6 @@
 {
   "name": "ep-lambda-utils",
-  "version": "1.11.2",
+  "version": "1.11.3",
   "description": "Documentation:",
   "main": "index.js",
   "private": true,
