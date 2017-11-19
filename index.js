@@ -60,9 +60,6 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     const contentType = headers['Content-Type']
     const sourceIp = identity.sourceIp
     const userAgent = identity.userAgent
-
-    logger.debug(`Received request with headers: ${JSON.stringify(headers)}`, loggerObject)
-
     const pathParams = event.pathParameters || {}
     const proxyPathParams = pathParams.proxy
 
@@ -72,6 +69,8 @@ function applyLambdaMiddleware(options, lambdaCallback) {
 
     const loggerObject = Object.assign({}, sourceIp ? {sourceIp} : null, awsRequestId ? {awsRequestId} : null)
     let parameters = { body: {}, query: {}}, missingParameters
+
+    logger.debug(`Received request with headers: ${JSON.stringify(headers)}`, loggerObject)
 
     if (event.httpMethod === 'POST' || event.httpMethod === 'DELETE') {
       if (event.isBase64Encoded) {
