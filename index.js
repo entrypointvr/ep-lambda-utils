@@ -57,7 +57,8 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     const headers = event.headers || {}
     const awsRequestId = context.awsRequestId
     const token = headers['Authorization']
-    const contentType = headers['Content-Type']
+    // Content type can sometimes be lower-case when coming through the lambda
+    const contentType = headers['Content-Type'] ? headers['Content-Type'] : headers['content-type']
     const sourceIp = identity.sourceIp
     const userAgent = identity.userAgent
     const pathParams = event.pathParameters || {}
