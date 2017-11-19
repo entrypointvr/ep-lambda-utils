@@ -61,6 +61,8 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     const sourceIp = identity.sourceIp
     const userAgent = identity.userAgent
 
+    logger.debug(`Received request with headers: ${JSON.stringify(headers)}`, loggerObject)
+
     const pathParams = event.pathParameters || {}
     const proxyPathParams = pathParams.proxy
 
