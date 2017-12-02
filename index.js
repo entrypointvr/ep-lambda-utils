@@ -68,8 +68,30 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       context.callbackWaitsForEmptyEventLoop = false
     }
 
-    const loggerObject = Object.assign({}, sourceIp ? {sourceIp} : null, awsRequestId ? {awsRequestId} : null)
-    let parameters = { body: {}, query: {}}, missingParameters
+    const loggerObject = Object.assign({},
+      sourceIp ? {sourceIp} : null,
+      awsRequestId ? {awsRequestId} : null,
+      proxyPathParams ? { path: proxyPathParams}: null
+    )
+
+    let parameters = {
+      httpMethod: event.httpMethod,
+      contentType,
+      body: {},
+      query: {}
+    }
+    let missingParameters
+
+    if (token) {
+      logger.info(`Token for current request: ${token}`, loggerObject)
+      // If the token is available add it as a parameter so it can be accessed
+      parameters.token = token
+    }
+    if (proxyPathParams) {
+      logger.info(`Path for current request: ${proxyPathParams}`, loggerObject)
+      if (!parameters) parameters = {}
+      parameters.pathParameters = proxyPathParams
+    }
 
     logger.debug(`Received request with headers: ${JSON.stringify(headers)}`, loggerObject)
 
@@ -103,21 +125,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
         return callback(null, apiResponse.lambda.BadRequest('Missing required parameters'))
       }
     }
-    if (token) {
-      logger.info(`Token for current request: ${token}`, {awsRequestId, sourceIp})
-      // If the token is available add it as a parameter so it can be accessed
-      parameters.token = token
-    }
-    if (proxyPathParams) {
-      logger.info(`Path params for current request: ${proxyPathParams}`, {awsRequestId, sourceIp})
-      if (!parameters) parameters = {}
-      parameters.pathParameters = proxyPathParams
-    }
 
-    if (parameters) {
-      parameters.httpMethod = event.httpMethod
-      parameters.contentType = contentType
-    }
     lambdaCallback(parameters, loggerObject, callback)
   }
 }
