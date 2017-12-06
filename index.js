@@ -91,6 +91,10 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       logger.info(`Path for current request: ${proxyPathParams}`, loggerObject)
       if (!parameters) parameters = {}
       parameters.pathParameters = proxyPathParams
+    } else {
+      logger.info(`Non-proxy path for current request: ${pathParams}`, loggerObject)
+      if (!parameters) parameters = {}
+      parameters.pathParameters = pathParams
     }
 
     logger.debug(`Received request with headers: ${JSON.stringify(headers)}`, loggerObject)
