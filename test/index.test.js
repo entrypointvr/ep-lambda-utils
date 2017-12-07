@@ -68,18 +68,23 @@ test('router composed of other routers', (done) => {
   let router = new Router()
   let router1 = new Router()
   let router2 = new Router()
+  let router3 = new Router()
   router1.get('/test/route1', () => Promise.resolve(true))
   router2.post('/test/route2', () => Promise.resolve(true))
+  router3.put('/test/signedurl', () => Promise.resolve(true))
   router.addRoutesFromRouter(router1)
   router.addRoutesFromRouter(router2)
+  router.addRoutesFromRouter(router3)
   let routes = [
     router.matchAndRun('GET', '/test/route1'),
     router.matchAndRun('POST', '/test/route2'),
+    router.matchAndRun('PUT', '/test/signedurl')
   ]
   Promise.all(routes.map(p => p.catch(() => false)))
-    .then(([one, two]) => {
+    .then(([one, two, three]) => {
       expect(one).toBe(true)
       expect(two).toBe(true)
+      expect(three).toBe(true)
       done()
     })
 })

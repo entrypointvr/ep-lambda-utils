@@ -92,6 +92,8 @@ function applyLambdaMiddleware(options, lambdaCallback) {
       if (!parameters) parameters = {}
       parameters.pathParameters = proxyPathParams
     } else {
+      // The name of the path parameters property is based on the route in the API Gateway, if it's not proxy it will be something
+      // else (ie. item) so pass that along anyways
       logger.info(`Non-proxy path for current request: ${pathParams}`, loggerObject)
       if (!parameters) parameters = {}
       parameters.pathParameters = pathParams
