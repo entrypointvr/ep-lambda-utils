@@ -116,8 +116,8 @@ function applyLambdaMiddleware(options, lambdaCallback) {
         }
       }
     } else {
-      parameters.query = event.queryStringParameters
-      logger.logRequestStart(userAgent, parameters.query, loggerObject)
+      parameters.query = event.queryStringParameters || {} // if there are no parameters just return an object anyways instead of null
+      logger.logRequestStart(userAgent, event.queryStringParameters, loggerObject)
     }
     logger.info(`Processing with http method: ${event.httpMethod} and content type: ${contentType}`, loggerObject)
     if ((requiredFields && requiredFields.length > 0) && (!parameters || parameters === '' || Object.keys(parameters).length === 0)) {
