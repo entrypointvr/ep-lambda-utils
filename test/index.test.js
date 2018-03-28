@@ -51,24 +51,28 @@ test('basic router', (done) => {
   let router = new Router()
   router.get('/test/route', () => Promise.resolve(true))
   router.post('/test/route', () => Promise.resolve(true))
+  router.delete('/test/route/:id', () => Promise.resolve(true))
   let routes = [
     router.matchAndRun('GET', '/test/route'),
     router.matchAndRun('GET', 'test/route'),
     router.matchAndRun('GET', '/test/route/test'),
     router.matchAndRun('GET', '/test/routes'),
     router.matchAndRun('GET', '/test/route/s'),
-    router.matchAndRun('GET', '/test/route/')
+    router.matchAndRun('GET', '/test/route/'),
+    router.matchAndRun('DELETE', '/test/route/123')
   ]
   Promise.all(routes.map(p => p.catch(() => false)))
-    .then(([one, two, three, four, five, six]) => {
+    .then(([one, two, three, four, five, six, seven]) => {
       expect(one).toBe(true)
       expect(two).toBe(false)
       expect(three).toBe(false)
       expect(four).toBe(false)
       expect(five).toBe(false)
       expect(six).toBe(false)
+      expect(seven).toBe(true)
       done()
   })
+  console.log(router.toString())
 })
 
 
@@ -95,4 +99,6 @@ test('router composed of other routers', (done) => {
       expect(three).toBe(true)
       done()
     })
+
+  console.log(router.toString())
 })
