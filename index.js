@@ -57,10 +57,10 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     const identity = requestContext.identity || {}
     const headers = event.headers || {}
     const awsRequestId = context.awsRequestId
-    const token = headers['Authorization']
+    const cookies = cookie.parse(headers['Cookie'] || headers['cookie'] || '')
+    const token = headers['Authorization'] || cookies['Authorization']
     // Content type can sometimes be lower-case when coming through the lambda
     const contentType = headers['Content-Type'] ? headers['Content-Type'] : headers['content-type']
-    const cookies = cookie.parse(headers['Cookie'] || headers['cookie'] || '')
     const sourceIp = identity.sourceIp
     const userAgent = identity.userAgent
     const pathParams = event.pathParameters || {}
