@@ -1,6 +1,7 @@
 const has = require('lodash.has');
 const apiResponse = require('ep-api-response-objects')
 const logger = require('ep-basic-logger')
+const cookie = require('cookie')
 const Router = require('./lib/router')
 const { postToScaphold, getScapholdToken } = require('./lib/scapholdUtils')
 
@@ -59,6 +60,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     const token = headers['Authorization']
     // Content type can sometimes be lower-case when coming through the lambda
     const contentType = headers['Content-Type'] ? headers['Content-Type'] : headers['content-type']
+    const cookies = cookie.parse(headers['Cookie'] || headers['cookie'] || '')
     const sourceIp = identity.sourceIp
     const userAgent = identity.userAgent
     const pathParams = event.pathParameters || {}
@@ -77,6 +79,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     let parameters = {
       httpMethod: event.httpMethod,
       contentType,
+      cookies,
       body: {},
       query: {}
     }

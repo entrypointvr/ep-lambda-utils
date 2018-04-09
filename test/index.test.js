@@ -47,6 +47,14 @@ test('apply lambda middleware, empty query parameters', (done) => {
   })({queryStringParameters: null}, {}, {})
 })
 
+test('test cookies', (done) => {
+  applyLambdaMiddleware((parameters, loggerObject, callback) => {
+    expect(parameters).toBeDefined()
+    expect(parameters.cookies.authorization).toBe('12312')
+    done()
+  })({httpMethod: 'GET', pathParameters: { proxy: 'test' }, headers: {Cookie: 'authorization=12312'}}, {}, {})
+})
+
 test('basic router', (done) => {
   let router = new Router()
   router.get('/test/route', () => Promise.resolve(true))
