@@ -73,7 +73,7 @@ function applyLambdaMiddleware(options, lambdaCallback) {
     const loggerObject = Object.assign({},
       sourceIp ? {sourceIp} : null,
       awsRequestId ? {awsRequestId} : null,
-      proxyPathParams ? { path: proxyPathParams}: null
+      proxyPathParams ? { path: `${event.httpMethod} ${proxyPathParams}`}: null
     )
 
     let parameters = {

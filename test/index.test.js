@@ -50,10 +50,10 @@ test('apply lambda middleware, empty query parameters', (done) => {
 test('test cookies', (done) => {
   applyLambdaMiddleware((parameters, loggerObject, callback) => {
     expect(parameters).toBeDefined()
-    expect(parameters.cookies.Authorization).toBe('12312')
-    expect(parameters.token).toBe('12312')
+    expect(parameters.cookies.Authorization).toBe('Bearer 12312')
+    expect(parameters.token).toBe('Bearer 12312')
     done()
-  })({httpMethod: 'GET', pathParameters: { proxy: 'test' }, headers: {Cookie: 'Authorization=12312'}}, {}, {})
+  })({httpMethod: 'GET', pathParameters: { proxy: 'test' }, headers: {Cookie: 'Authorization=Bearer%2012312'}}, {}, {})
 })
 
 test('basic router', (done) => {
