@@ -1,20 +1,26 @@
-const has = require('lodash.has');
+const has = require('lodash.has')
 const apiResponse = require('ep-api-response-objects')
 const logger = require('ep-basic-logger')
 const cookie = require('cookie')
 const Router = require('./lib/router')
-const { postToScaphold, getScapholdToken } = require('./lib/scapholdUtils')
 
-function prepareLambdaInvokeBody(parameters) {
+function prepareLambdaInvokeBody({method, loggerObject, functionName, proxyPathParameters, body, token, currentFunction}) {
   return ({
-    FunctionName: parameters.functionName,
+    FunctionName: functionName,
     Payload: JSON.stringify({
-      body: JSON.stringify(parameters.body),
-      httpMethod: 'POST',
+      headers: {
+        Authorization: token,
+        'Content-Type': 'application/json'
+      },
+      pathParameters: {
+        proxy: proxyPathParameters
+      },
+      body: JSON.stringify(body),
+      httpMethod: method,
       requestContext: {
         identity: {
-          userAgent: parameters.currentFunction,
-          sourceIp: parameters.currentFunction
+          userAgent: currentFunction,
+          sourceIp: loggerObject.sourceIp
         }
       }
     })
@@ -143,8 +149,6 @@ module.exports = {
   prepareLambdaInvokeBody,
   paginateAwsFunction,
   applyLambdaMiddleware,
-  postToScaphold,
-  getScapholdToken,
   Router
 }
 

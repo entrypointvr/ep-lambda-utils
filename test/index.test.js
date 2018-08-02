@@ -1,4 +1,4 @@
-const { applyLambdaMiddleware, Router } = require('../index')
+const { applyLambdaMiddleware, Router, prepareLambdaInvokeBody } = require('../index')
 
 test('apply lambda middleware no required fields', (done) => {
   applyLambdaMiddleware((parameters, loggerObject, callback) => {
@@ -108,6 +108,13 @@ test('router composed of other routers', (done) => {
       expect(three).toBe(true)
       done()
     })
+})
 
-  console.log(router.toString())
+test('prepare lambda body invoke', (done) => {
+  const invoke = prepareLambdaInvokeBody({method: 'GET', body: {'test': 1}, token: 'Bearer 123', loggerObject: { sourceIp: '1.2.3.4'}, functionName: 'test'})
+  applyLambdaMiddleware((parameters, loggerObject, callback) => {
+    expect(parameters).toBeDefined()
+    expect(parameters.token).toBe('Bearer 123')
+    done()
+  })(JSON.parse(invoke.Payload), {}, {})
 })
