@@ -110,11 +110,22 @@ test('router composed of other routers', (done) => {
     })
 })
 
-test('prepare lambda body invoke', (done) => {
-  const invoke = prepareLambdaInvokeBody({method: 'GET', body: {'test': 1}, token: 'Bearer 123', loggerObject: { sourceIp: '1.2.3.4'}, functionName: 'test'})
+test('prepare lambda body invoke post', (done) => {
+  const invoke = prepareLambdaInvokeBody({method: 'POST', parameters: {'test': 1}, token: 'Bearer 123', loggerObject: { sourceIp: '1.2.3.4'}, functionName: 'test'})
   applyLambdaMiddleware((parameters, loggerObject, callback) => {
     expect(parameters).toBeDefined()
     expect(parameters.token).toBe('Bearer 123')
+    expect(parameters.body.test).toBe(1)
+    done()
+  })(JSON.parse(invoke.Payload), {}, {})
+})
+
+test('prepare lambda body invoke get', (done) => {
+  const invoke = prepareLambdaInvokeBody({method: 'GET', parameters: {'test': 1}, token: 'Bearer 123', loggerObject: { sourceIp: '1.2.3.4'}, functionName: 'test'})
+  applyLambdaMiddleware((parameters, loggerObject, callback) => {
+    expect(parameters).toBeDefined()
+    expect(parameters.token).toBe('Bearer 123')
+    expect(parameters.query.test).toBe(1)
     done()
   })(JSON.parse(invoke.Payload), {}, {})
 })

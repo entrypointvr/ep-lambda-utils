@@ -22,9 +22,9 @@ function prepareLambdaInvokeBody({method, loggerObject, functionName, proxyPathP
     }
   }
   if(method === 'GET') {
-    payload.body = JSON.stringify(parameters)
-  } else if (method === 'POST' || method === 'DELETE') {
     payload.queryStringParameters = parameters
+  } else if (method === 'POST' || method === 'DELETE') {
+    payload.body = JSON.stringify(parameters)
   } else {
     throw 'Unknown http method type'
   }
