@@ -22,7 +22,7 @@ function prepareLambdaInvokeBody({method, loggerObject, functionName, proxyPathP
     }
   }
   if(method === 'GET') {
-    payload.body = JSON.stringify(parameters)pacj
+    payload.body = JSON.stringify(parameters)
   } else if (method === 'POST' || method === 'DELETE') {
     payload.queryStringParameters = parameters
   } else {
