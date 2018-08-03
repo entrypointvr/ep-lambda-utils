@@ -4,26 +4,33 @@ const logger = require('ep-basic-logger')
 const cookie = require('cookie')
 const Router = require('./lib/router')
 
-function prepareLambdaInvokeBody({method, loggerObject, functionName, proxyPathParameters, body, token, currentFunction}) {
+function prepareLambdaInvokeBody({method, loggerObject, functionName, proxyPathParameters, parameters, token, currentFunction}) {
+  const payload = {
+    headers: {
+      Authorization: token,
+      'Content-Type': 'application/json'
+    },
+    pathParameters: {
+      proxy: proxyPathParameters
+    },
+    httpMethod: method,
+    requestContext: {
+      identity: {
+        userAgent: currentFunction,
+        sourceIp: loggerObject.sourceIp
+      }
+    }
+  }
+  if(method === 'GET') {
+    payload.body = JSON.stringify(parameters)pacj
+  } else if (method === 'POST' || method === 'DELETE') {
+    payload.queryStringParameters = parameters
+  } else {
+    throw 'Unknown http method type'
+  }
   return ({
     FunctionName: functionName,
-    Payload: JSON.stringify({
-      headers: {
-        Authorization: token,
-        'Content-Type': 'application/json'
-      },
-      pathParameters: {
-        proxy: proxyPathParameters
-      },
-      body: JSON.stringify(body),
-      httpMethod: method,
-      requestContext: {
-        identity: {
-          userAgent: currentFunction,
-          sourceIp: loggerObject.sourceIp
-        }
-      }
-    })
+    Payload: JSON.stringify(payload)
   })
 }
 
